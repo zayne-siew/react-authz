@@ -1,0 +1,55 @@
+{
+  "name": "react-authz",
+  "type": "module",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "A React application for testing authorization features.",
+  "author": "zayne-siew",
+  "scripts": {
+    "dev": "bun run scripts/dev.ts",
+    "dev:server": "bun run --env-file=.env --hot server/index.ts",
+    "dev:vite": "wait-on http://localhost:30000/healthz && vite dev",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:pull": "drizzle-kit pull && bun run db:typegen",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:typegen": "source .env && curl -s http://localhost:4000/generators/typescript?included_schemas=public > src/database.gen.ts"
+  },
+  "dependencies": {
+    "@mantine/core": "^8.1.1",
+    "@mantine/dates": "^8.1.1",
+    "@mantine/notifications": "^8.1.1",
+    "@tanstack/react-query": "^5.81.2",
+    "drizzle-orm": "^0.44.2",
+    "hono": "^4.8.5",
+    "pg": "^8.16.3",
+    "web-vitals": "^5.0.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "@hono/zod-validator": "^0.7.0",
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-query-devtools": "^5.74.6",
+    "@tanstack/react-router": "^1.117.1",
+    "@tanstack/react-router-devtools": "^1.117.1",
+    "@tanstack/router-plugin": "^1.117.2",
+    "@types/bun": "latest",
+    "@types/pg": "^8.15.2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "drizzle-kit": "^0.31.4",
+    "npm-check-updates": "^18.0.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.10",
+    "vite": "^7.0.4",
+    "vite-tsconfig-paths": "^5.1.4",
+    "wait-on": "^8.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

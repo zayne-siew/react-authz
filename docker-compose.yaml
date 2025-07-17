@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:5432
+
+  meta:
+    image: supabase/postgres-meta:v0.88.8
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 4000:4000
+    env_file: .env
+    environment:
+      PG_META_PORT: 4000
+      PG_META_DB_HOST: postgres
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: ${DB_NAME}
+      PG_META_DB_USER: ${DB_USER}
+      PG_META_DB_PASSWORD: ${DB_PASSWORD}
