@@ -1,0 +1,18 @@
+module todo
+
+extend type organization
+  relations
+    define can_create_todos: member
+    define can_view_todos: member
+    define can_update_todos: admin
+    define can_delete_todos: admin
+
+type todo
+  relations
+    define owner: [user]
+    define organization: [organization]
+
+    define can_create: can_create_todos from organization
+    define can_view: owner or can_view_todos from organization
+    define can_update: owner or can_update_todos from organization
+    define can_delete: can_delete_todos from organization

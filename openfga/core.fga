@@ -1,0 +1,7 @@
+module core
+
+type user
+type organization
+  relations
+    define member: [user, organization#member] or admin
+    define admin: [user]

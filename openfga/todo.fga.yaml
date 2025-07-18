@@ -1,0 +1,320 @@
+name: Tests for todo module
+
+model_file: fga.mod
+tuple_file: core-tuples.yaml
+
+tuples:
+  # Todo ownership relationships
+  - user: user:anne
+    relation: owner
+    object: todo:task1
+
+  - user: user:charlie
+    relation: owner
+    object: todo:task2
+
+  - user: user:diana
+    relation: owner
+    object: todo:task3
+
+  - user: user:eve
+    relation: owner
+    object: todo:task4
+
+  # Todo organization relationships
+  - user: organization:openfga
+    relation: organization
+    object: todo:task1
+
+  - user: organization:openfga
+    relation: organization
+    object: todo:task2
+
+  - user: organization:acme
+    relation: organization
+    object: todo:task3
+
+  - user: organization:startup
+    relation: organization
+    object: todo:task4
+
+  # Additional todos for comprehensive testing
+  - user: user:bob
+    relation: owner
+    object: todo:admin-task
+
+  - user: organization:acme
+    relation: organization
+    object: todo:admin-task
+
+  - user: user:frank
+    relation: owner
+    object: todo:startup-task
+
+  - user: organization:startup
+    relation: organization
+    object: todo:startup-task
+
+tests:
+  - name: Organization admins can create todos
+    check:
+      - user: user:anne
+        object: organization:openfga
+        assertions:
+          can_create_todos: true
+      - user: user:bob
+        object: organization:acme
+        assertions:
+          can_create_todos: true
+      - user: user:frank
+        object: organization:startup
+        assertions:
+          can_create_todos: true
+
+  - name: Organization members can create todos
+    check:
+      - user: user:charlie
+        object: organization:openfga
+        assertions:
+          can_create_todos: true
+      - user: user:diana
+        object: organization:acme
+        assertions:
+          can_create_todos: true
+      - user: user:eve
+        object: organization:startup
+        assertions:
+          can_create_todos: true
+
+  - name: Organization admins can view todos
+    check:
+      - user: user:anne
+        object: organization:openfga
+        assertions:
+          can_view_todos: true
+      - user: user:bob
+        object: organization:acme
+        assertions:
+          can_view_todos: true
+      - user: user:frank
+        object: organization:startup
+        assertions:
+          can_view_todos: true
+
+  - name: Organization members can view todos
+    check:
+      - user: user:charlie
+        object: organization:openfga
+        assertions:
+          can_view_todos: true
+      - user: user:diana
+        object: organization:acme
+        assertions:
+          can_view_todos: true
+      - user: user:eve
+        object: organization:startup
+        assertions:
+          can_view_todos: true
+
+  - name: Only organization admins can update todos
+    check:
+      - user: user:anne
+        object: organization:openfga
+        assertions:
+          can_update_todos: true
+      - user: user:bob
+        object: organization:acme
+        assertions:
+          can_update_todos: true
+      - user: user:frank
+        object: organization:startup
+        assertions:
+          can_update_todos: true
+
+  - name: Organization members cannot update todos at org level
+    check:
+      - user: user:charlie
+        object: organization:openfga
+        assertions:
+          can_update_todos: false
+      - user: user:diana
+        object: organization:acme
+        assertions:
+          can_update_todos: false
+      - user: user:eve
+        object: organization:startup
+        assertions:
+          can_update_todos: false
+
+  - name: Only organization admins can delete todos
+    check:
+      - user: user:anne
+        object: organization:openfga
+        assertions:
+          can_delete_todos: true
+      - user: user:bob
+        object: organization:acme
+        assertions:
+          can_delete_todos: true
+      - user: user:frank
+        object: organization:startup
+        assertions:
+          can_delete_todos: true
+
+  - name: Organization members cannot delete todos at org level
+    check:
+      - user: user:charlie
+        object: organization:openfga
+        assertions:
+          can_delete_todos: false
+      - user: user:diana
+        object: organization:acme
+        assertions:
+          can_delete_todos: false
+      - user: user:eve
+        object: organization:startup
+        assertions:
+          can_delete_todos: false
+
+  - name: Todo owners can view their todos
+    check:
+      - user: user:anne
+        object: todo:task1
+        assertions:
+          can_view: true
+      - user: user:charlie
+        object: todo:task2
+        assertions:
+          can_view: true
+      - user: user:diana
+        object: todo:task3
+        assertions:
+          can_view: true
+      - user: user:eve
+        object: todo:task4
+        assertions:
+          can_view: true
+
+  - name: Todo owners can update their todos
+    check:
+      - user: user:anne
+        object: todo:task1
+        assertions:
+          can_update: true
+      - user: user:charlie
+        object: todo:task2
+        assertions:
+          can_update: true
+      - user: user:diana
+        object: todo:task3
+        assertions:
+          can_update: true
+      - user: user:eve
+        object: todo:task4
+        assertions:
+          can_update: true
+
+  - name: Organization members can view todos in their organization
+    check:
+      - user: user:charlie
+        object: todo:task1
+        assertions:
+          can_view: true
+      - user: user:anne
+        object: todo:task2
+        assertions:
+          can_view: true
+      - user: user:diana
+        object: todo:task3
+        assertions:
+          can_view: true
+
+  - name: Organization admins can update todos in their organization
+    check:
+      - user: user:anne
+        object: todo:task2
+        assertions:
+          can_update: true
+      - user: user:bob
+        object: todo:task3
+        assertions:
+          can_update: true
+      - user: user:frank
+        object: todo:task4
+        assertions:
+          can_update: true
+
+  - name: Organization admins can delete todos in their organization
+    check:
+      - user: user:anne
+        object: todo:task1
+        assertions:
+          can_delete: true
+      - user: user:anne
+        object: todo:task2
+        assertions:
+          can_delete: true
+      - user: user:bob
+        object: todo:task3
+        assertions:
+          can_delete: true
+      - user: user:frank
+        object: todo:task4
+        assertions:
+          can_delete: true
+
+  - name: Non-owners cannot view todos from other organizations
+    check:
+      - user: user:charlie
+        object: todo:task3
+        assertions:
+          can_view: false
+      - user: user:diana
+        object: todo:task1
+        assertions:
+          can_view: false
+      - user: user:eve
+        object: todo:task1
+        assertions:
+          can_view: false
+
+  - name: Non-owners cannot update todos they don't own in other orgs
+    check:
+      - user: user:charlie
+        object: todo:task3
+        assertions:
+          can_update: false
+      - user: user:diana
+        object: todo:task1
+        assertions:
+          can_update: false
+
+  - name: Non-admins cannot delete todos
+    check:
+      - user: user:charlie
+        object: todo:task1
+        assertions:
+          can_delete: false
+      - user: user:diana
+        object: todo:task3
+        assertions:
+          can_delete: false
+      - user: user:eve
+        object: todo:task4
+        assertions:
+          can_delete: false
+
+  - name: Todo creation permissions through organization
+    check:
+      - user: user:anne
+        object: todo:task1
+        assertions:
+          can_create: true
+      - user: user:charlie
+        object: todo:task2
+        assertions:
+          can_create: true
+      - user: user:diana
+        object: todo:task3
+        assertions:
+          can_create: true

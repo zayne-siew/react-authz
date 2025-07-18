@@ -1,0 +1,64 @@
+name: Tests for core module
+
+model_file: fga.mod
+tuple_file: core-tuples.yaml
+
+tests:
+  - name: Admins are members
+    check:
+      - user: user:anne
+        object: organization:openfga
+        assertions:
+          admin: true
+          member: true
+
+  - name: Organization admin permissions
+    check:
+      - user: user:bob
+        object: organization:acme
+        assertions:
+          admin: true
+          member: true
+      - user: user:frank
+        object: organization:startup
+        assertions:
+          admin: true
+          member: true
+
+  - name: Direct organization members
+    check:
+      - user: user:charlie
+        object: organization:openfga
+        assertions:
+          admin: false
+          member: true
+      - user: user:diana
+        object: organization:acme
+        assertions:
+          admin: false
+          member: true
+      - user: user:eve
+        object: organization:startup
+        assertions:
+          admin: false
+          member: true
+
+  - name: Non-members have no access
+    check:
+      - user: user:charlie
+        object: organization:acme
+        assertions:
+          admin: false
+          member: false
+      - user: user:bob
+        object: organization:openfga
+        assertions:
+          admin: false
+          member: false
+
+  - name: Nested organization memberships
+    check:
+      - user: organization:subsidiary#member
+        object: organization:parent-corp
+        assertions:
+          member: true

@@ -1,0 +1,34 @@
+# Stores all core tuples for the OpenFGA model
+# This file is used in the core.fga.yaml test file.
+
+# Organization admins - these users have admin access to organizations
+- user: user:anne
+  relation: admin
+  object: organization:openfga
+
+- user: user:bob
+  relation: admin
+  object: organization:acme
+
+# Organization members - direct membership
+- user: user:charlie
+  relation: member
+  object: organization:openfga
+
+- user: user:diana
+  relation: member
+  object: organization:acme
+
+# Nested organization membership - organizations can be members of other organizations
+- user: organization:subsidiary#member
+  relation: member
+  object: organization:parent-corp
+
+# Additional users for testing various scenarios
+- user: user:eve
+  relation: member
+  object: organization:startup
+
+- user: user:frank
+  relation: admin
+  object: organization:startup

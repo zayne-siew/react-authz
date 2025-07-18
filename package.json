@@ -20,6 +20,7 @@
     "@mantine/core": "^8.1.1",
     "@mantine/dates": "^8.1.1",
     "@mantine/notifications": "^8.1.1",
+    "@openfga/sdk": "^0.9.0",
     "@tanstack/react-query": "^5.81.2",
     "drizzle-orm": "^0.44.2",
     "hono": "^4.8.5",
