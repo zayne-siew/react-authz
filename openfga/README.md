@@ -76,7 +76,8 @@ fga store list
 #   ]
 # }
 
-fga model write --store-id=01K0E5PBE97ERBDABTAVBMGJFS --file=fga.mod
+# fga model write --store-id $FGA_STORE_ID --file fga.mod
+fga model write --store-id 01K0E5PBE97ERBDABTAVBMGJFS --file fga.mod
 # {
 #   "authorization_model_id":"01K0E7V7F1VG680YKV92H060A7"
 # }

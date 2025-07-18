@@ -14,7 +14,9 @@
     "db:pull": "drizzle-kit pull && bun run db:typegen",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:typegen": "source .env && curl -s http://localhost:4000/generators/typescript?included_schemas=public > src/database.gen.ts"
+    "db:typegen": "source .env && curl -s http://localhost:4000/generators/typescript?included_schemas=public > src/database.gen.ts",
+    "openfga:push": "cd openfga && fga model write --store-id $FGA_STORE_ID --file fga.mod",
+    "openfga:init": "cd openfga && export FGA_STORE_ID=$(fga store create --name \"React AuthZ OpenFGA Model\" --model fga.mod --debug | jq -r .store.id) && bun run openfga:push"
   },
   "dependencies": {
     "@mantine/core": "^8.1.1",

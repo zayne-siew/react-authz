@@ -1,25 +1,32 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:17
+    container_name: postgres
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
     restart: unless-stopped
     env_file: .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - default
     ports:
       - ${DB_PORT}:5432
+    command: postgres -c 'max_connections=100'
 
   meta:
     image: supabase/postgres-meta:v0.88.8
+    container_name: pg-meta
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - default
     ports:
       - 4000:4000
     env_file: .env
@@ -30,3 +37,42 @@ services:
       PG_META_DB_NAME: ${DB_NAME}
       PG_META_DB_USER: ${DB_USER}
       PG_META_DB_PASSWORD: ${DB_PASSWORD}
+
+  openfga:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: openfga/openfga:latest
+    container_name: openfga
+    command: run
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      - OPENFGA_DATASTORE_MAX_OPEN_CONNS=100 # see postgres container
+      - OPENFGA_PLAYGROUND_ENABLED=true
+    networks:
+      - default
+    ports:
+      - "8080:8080" # http
+      - "8081:8081" # grpc
+      - "3000:3000" # playground
+      - "2112:2112" # prometheus metrics
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=openfga:8081"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    networks:
+      - default
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension

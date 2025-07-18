@@ -9,106 +9,173 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      employee_role: {
+      assertion: {
         Row: {
-          created_at: string
-          description: string | null
-          id: number
-          is_active: boolean | null
-          name: string
-          updated_at: string
+          assertions: string | null
+          authorization_model_id: string
+          store: string
         }
         Insert: {
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean | null
-          name: string
-          updated_at?: string
+          assertions?: string | null
+          authorization_model_id: string
+          store: string
         }
         Update: {
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean | null
-          name?: string
-          updated_at?: string
+          assertions?: string | null
+          authorization_model_id?: string
+          store?: string
         }
         Relationships: []
       }
-      employees: {
+      authorization_model: {
         Row: {
-          created_at: string
-          id: number
-          is_active: boolean | null
-          name: string
-          role_id: number | null
-          updated_at: string
+          authorization_model_id: string
+          schema_version: string
+          serialized_protobuf: string | null
+          store: string
+          type: string
+          type_definition: string | null
         }
         Insert: {
-          created_at?: string
-          id?: never
-          is_active?: boolean | null
-          name: string
-          role_id?: number | null
-          updated_at?: string
+          authorization_model_id: string
+          schema_version?: string
+          serialized_protobuf?: string | null
+          store: string
+          type: string
+          type_definition?: string | null
         }
         Update: {
-          created_at?: string
-          id?: never
-          is_active?: boolean | null
-          name?: string
-          role_id?: number | null
-          updated_at?: string
+          authorization_model_id?: string
+          schema_version?: string
+          serialized_protobuf?: string | null
+          store?: string
+          type?: string
+          type_definition?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "employees_role_id_fkey"
-            columns: ["role_id"]
-            referencedRelation: "employee_role"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      todo: {
+      changelog: {
         Row: {
-          completed: boolean
-          created_at: string
-          description: string | null
-          id: number
-          is_active: boolean | null
-          owner_id: number
-          title: string
-          updated_at: string
+          _user: string
+          condition_context: string | null
+          condition_name: string | null
+          inserted_at: string
+          object_id: string
+          object_type: string
+          operation: number
+          relation: string
+          store: string
+          ulid: string
         }
         Insert: {
-          completed?: boolean
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean | null
-          owner_id: number
-          title: string
-          updated_at?: string
+          _user: string
+          condition_context?: string | null
+          condition_name?: string | null
+          inserted_at: string
+          object_id: string
+          object_type: string
+          operation: number
+          relation: string
+          store: string
+          ulid: string
         }
         Update: {
-          completed?: boolean
-          created_at?: string
-          description?: string | null
-          id?: never
-          is_active?: boolean | null
-          owner_id?: number
-          title?: string
-          updated_at?: string
+          _user?: string
+          condition_context?: string | null
+          condition_name?: string | null
+          inserted_at?: string
+          object_id?: string
+          object_type?: string
+          operation?: number
+          relation?: string
+          store?: string
+          ulid?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "employee_id_fkey"
-            columns: ["owner_id"]
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      goose_db_version: {
+        Row: {
+          id: number
+          is_applied: boolean
+          tstamp: string
+          version_id: number
+        }
+        Insert: {
+          id?: number
+          is_applied: boolean
+          tstamp?: string
+          version_id: number
+        }
+        Update: {
+          id?: number
+          is_applied?: boolean
+          tstamp?: string
+          version_id?: number
+        }
+        Relationships: []
+      }
+      store: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at: string
+          deleted_at?: string | null
+          id: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tuple: {
+        Row: {
+          _user: string
+          condition_context: string | null
+          condition_name: string | null
+          inserted_at: string
+          object_id: string
+          object_type: string
+          relation: string
+          store: string
+          ulid: string
+          user_type: string
+        }
+        Insert: {
+          _user: string
+          condition_context?: string | null
+          condition_name?: string | null
+          inserted_at: string
+          object_id: string
+          object_type: string
+          relation: string
+          store: string
+          ulid: string
+          user_type: string
+        }
+        Update: {
+          _user?: string
+          condition_context?: string | null
+          condition_name?: string | null
+          inserted_at?: string
+          object_id?: string
+          object_type?: string
+          relation?: string
+          store?: string
+          ulid?: string
+          user_type?: string
+        }
+        Relationships: []
       }
     }
     Views: {
