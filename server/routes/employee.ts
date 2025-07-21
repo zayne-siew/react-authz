@@ -35,8 +35,13 @@ const route = factory
     ),
     async (c) => {
       const { page, limit = EMPLOYEE_QUERY_LIMIT } = c.req.valid('query');
-      const organizations = c.get('organizations') as FgaObject[];
+      const organizations = c.get('organizations');
+      if (!organizations || organizations.length === 0) {
+        console.warn('No organizations found for the user');
+        return c.json([], 200);
+      }
 
+      // Retrieve all users from accessible organizations
       const promises = await Promise.allSettled(
         organizations.map(async (organization) => {
           const response = await fgaClient.listUsers(
