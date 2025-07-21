@@ -93,6 +93,67 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_role: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string
+          id: number
+          is_active: boolean | null
+          name: string
+          role_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          is_active?: boolean | null
+          name: string
+          role_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          is_active?: boolean | null
+          name?: string
+          role_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_role_id_fkey"
+            columns: ["role_id"]
+            referencedRelation: "employee_role"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goose_db_version: {
         Row: {
           id: number
@@ -137,6 +198,46 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      todo: {
+        Row: {
+          completed: boolean
+          created_at: string
+          description: string | null
+          id: number
+          is_active: boolean | null
+          owner_id: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          owner_id: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          owner_id?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_id_fkey"
+            columns: ["owner_id"]
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tuple: {
         Row: {

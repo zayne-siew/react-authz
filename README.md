@@ -11,3 +11,5 @@ This project explores authorization implementations in a standard ReactJS app
 3. Set up the PostgreSQL database via `bun db:push`.
 
 4. Set up the OpenFGA authorization model via `bun openfga:init`.
+
+5. Finally, pull the database schema via `bun db:typegen`.
