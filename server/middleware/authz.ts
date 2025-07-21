@@ -37,7 +37,6 @@ export function authz() {
     c.set('user', user);
 
     // Retrieve organizations from OpenFGA
-    console.log('Fetching organizations for user:', stringifyFgaObject(user));
     const response = await fgaClient.listObjects({
       user: stringifyFgaObject(user),
       relation: 'member',
@@ -48,7 +47,6 @@ export function authz() {
       console.error('Failed to fetch organizations:', response.$response);
       c.set('organizations', []);
     } else {
-      console.log('Organizations:', response.objects);
       c.set('organizations', response.objects.map(parseFgaObject));
     }
 
