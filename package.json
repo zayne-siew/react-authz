@@ -15,10 +15,11 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:typegen": "source .env && curl -s http://localhost:4000/generators/typescript?included_schemas=public > src/database.gen.ts",
-    "openfga:create": "cd openfga && export FGA_STORE_ID=$(fga store create --name \"React AuthZ OpenFGA Model\" --model fga.mod --debug | jq -r .store.id) && cd ..",
-    "openfga:migrate": "source .env && openfga migrate --datastore-uri \"postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable\" --datastore-engine postgres",
-    "openfga:push": "cd openfga && fga model write --store-id $FGA_STORE_ID --file fga.mod && cd ..",
-    "openfga:init": "bun openfga:migrate && bun openfga:create && bun openfga:push"
+    "fga:create": "cd openfga && export FGA_STORE_ID=$(fga store create --name \"React AuthZ OpenFGA Model\" --model fga.mod --debug | jq -r .store.id) && cd ..",
+    "fga:migrate": "source .env && openfga migrate --datastore-uri \"postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable\" --datastore-engine postgres",
+    "fga:push": "cd openfga && fga model write --store-id $FGA_STORE_ID --file fga.mod && cd ..",
+    "fga:seed": "bun run scripts/seed.ts",
+    "fga:init": "bun fga:migrate && bun fga:create && bun fga:push && bun fga:seed"
   },
   "dependencies": {
     "@mantine/core": "^8.1.1",
@@ -52,7 +53,8 @@
     "tailwindcss": "^4.1.10",
     "vite": "^7.0.4",
     "vite-tsconfig-paths": "^5.1.4",
-    "wait-on": "^8.0.3"
+    "wait-on": "^8.0.3",
+    "yaml": "^2.8.0"
   },
   "peerDependencies": {
     "typescript": "^5"
