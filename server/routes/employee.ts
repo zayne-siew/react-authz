@@ -1,10 +1,14 @@
 import { zValidator } from '@hono/zod-validator';
-import { count, eq } from 'drizzle-orm';
+import type { FgaObject } from '@openfga/sdk';
+import { count, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { employeeTable } from '#server/drizzle/employee.ts';
+import { employeeRoleTable } from '#server/drizzle/employee_role.ts';
 import { factory } from '#server/factory.ts';
 import { db } from '#server/lib/db.ts';
+import fgaClient from '#server/lib/openfga.ts';
+import { authz } from '#server/middleware/authz';
 import {
   getOffset,
   LIMIT_PARAM,
@@ -18,6 +22,7 @@ export const EMPLOYEE_QUERY_LIMIT = 50;
 
 const route = factory
   .createApp()
+  .use(authz())
 
   .get(
     '/',
@@ -30,11 +35,60 @@ const route = factory
     ),
     async (c) => {
       const { page, limit = EMPLOYEE_QUERY_LIMIT } = c.req.valid('query');
-      const employees = await db.query.employeeTable.findMany({
-        with: { role: true },
-        limit,
-        offset: getOffset(page, limit),
+      const organizations = c.get('organizations') as FgaObject[];
+
+      const promises = await Promise.allSettled(
+        organizations.map(async (organization) => {
+          const response = await fgaClient.listUsers(
+            {
+              object: organization,
+              relation: 'member',
+              user_filters: [
+                {
+                  type: 'user',
+                },
+              ],
+            },
+            {
+              authorizationModelId: c.env.FGA_AUTHORIZATION_MODEL_ID,
+            },
+          );
+          return response.users
+            .map((user) => user.object)
+            .filter((user) => !!user);
+        }),
+      );
+
+      const allUsers = new Set<FgaObject>();
+      promises.forEach((promise) => {
+        if (promise.status === 'fulfilled') {
+          promise.value.forEach((user) => allUsers.add(user));
+        } else {
+          console.warn('Failed to fetch users:', promise.reason);
+        }
       });
+
+      const result = await db
+        .select()
+        .from(employeeTable)
+        .leftJoin(
+          employeeRoleTable,
+          eq(employeeTable.role_id, employeeRoleTable.id),
+        )
+        .where(
+          inArray(
+            employeeTable.name,
+            Array.from(allUsers).map((u) => u.id),
+          ),
+        )
+        .limit(limit)
+        .offset(getOffset(page, limit));
+
+      const employees = result.map(({ employees, employee_role }) => ({
+        ...employees,
+        role: employee_role,
+      }));
+
       return c.json(employees, 200);
     },
   )
