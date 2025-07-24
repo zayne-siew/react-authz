@@ -1,5 +1,4 @@
 import { zValidator } from '@hono/zod-validator';
-import type { FgaObject } from '@openfga/sdk';
 import { count, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -7,8 +6,8 @@ import { employeeTable } from '#server/drizzle/employee.ts';
 import { employeeRoleTable } from '#server/drizzle/employee_role.ts';
 import { factory } from '#server/factory.ts';
 import { db } from '#server/lib/db.ts';
-import fgaClient from '#server/lib/openfga.ts';
-import { authz } from '#server/middleware/authz';
+import { authn } from '#server/middleware/authn.ts';
+import { getUsersInSameOrganizations } from '#server/utils/openfga/index.ts';
 import {
   getOffset,
   LIMIT_PARAM,
@@ -22,7 +21,7 @@ export const EMPLOYEE_QUERY_LIMIT = 50;
 
 const route = factory
   .createApp()
-  .use(authz())
+  .use(authn())
 
   .get(
     '/',
@@ -35,43 +34,11 @@ const route = factory
     ),
     async (c) => {
       const { page, limit = EMPLOYEE_QUERY_LIMIT } = c.req.valid('query');
-      const organizations = c.get('organizations');
-      if (!organizations || organizations.length === 0) {
-        console.warn('No organizations found for the user');
+      const allUsers = await getUsersInSameOrganizations(c.get('user'));
+      if (!allUsers || allUsers.length === 0) {
+        console.warn('No users found in the same organizations');
         return c.json([], 200);
       }
-
-      // Retrieve all users from accessible organizations
-      const promises = await Promise.allSettled(
-        organizations.map(async (organization) => {
-          const response = await fgaClient.listUsers(
-            {
-              object: organization,
-              relation: 'member',
-              user_filters: [
-                {
-                  type: 'user',
-                },
-              ],
-            },
-            {
-              authorizationModelId: c.env.FGA_AUTHORIZATION_MODEL_ID,
-            },
-          );
-          return response.users
-            .map((user) => user.object)
-            .filter((user) => !!user);
-        }),
-      );
-
-      const allUsers = new Set<FgaObject>();
-      promises.forEach((promise) => {
-        if (promise.status === 'fulfilled') {
-          promise.value.forEach((user) => allUsers.add(user));
-        } else {
-          console.warn('Failed to fetch users:', promise.reason);
-        }
-      });
 
       const result = await db
         .select()
@@ -83,7 +50,7 @@ const route = factory
         .where(
           inArray(
             employeeTable.name,
-            Array.from(allUsers).map((u) => u.id),
+            allUsers.map((u) => u.id),
           ),
         )
         .limit(limit)
@@ -99,9 +66,22 @@ const route = factory
   )
 
   .get('/count', async (c) => {
+    const allUsers = await getUsersInSameOrganizations(c.get('user'));
+    if (!allUsers || allUsers.length === 0) {
+      console.warn('No users found in the same organizations');
+      return c.json([], 200);
+    }
+
     const employeeCount = await db
       .select({ value: count() })
-      .from(employeeTable);
+      .from(employeeTable)
+      .where(
+        inArray(
+          employeeTable.name,
+          allUsers.map((u) => u.id),
+        ),
+      );
+
     return employeeCount.length === 0
       ? c.notFound()
       : c.json({ value: employeeCount[0].value }, 200);
